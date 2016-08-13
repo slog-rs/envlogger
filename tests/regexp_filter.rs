@@ -1,5 +1,5 @@
 #[macro_use] extern crate log;
-extern crate env_logger;
+extern crate slog_envlogger;
 
 use std::process;
 use std::env;
@@ -14,7 +14,7 @@ fn main() {
 }
 
 fn child_main() {
-    env_logger::init().unwrap();
+    slog_envlogger::init().unwrap();
     info!("XYZ Message");
 }
 

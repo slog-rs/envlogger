@@ -1,160 +1,72 @@
-log
-===
+# slog-envlogger - Port of `env_logger` as a `slog-rs` drain
 
-A Rust library providing a lightweight logging *facade*.
+<p align="center">
+  <a href="https://travis-ci.org/dpc/slog-envlogger">
+      <img src="https://img.shields.io/travis/dpc/slog-envlogger/master.svg?style=flat-square" alt="Travis CI Build Status">
+  </a>
+  <a href="https://crates.io/crates/slog-envlogger">
+      <img src="http://meritbadge.herokuapp.com/slog?style=flat-square" alt="crates.io">
+  </a>
+  <a href="https://gitter.im/dpc/slog-rs">
+      <img src="https://img.shields.io/badge/GITTER-join%20chat-green.svg?style=flat-square" alt="Gitter Chat">
+  </a>
+  <br>
+  <strong><a href="//dpc.github.io/slog-envlogger/">Documentation</a></strong>
+</p>
 
-[![Build Status](https://travis-ci.org/rust-lang-nursery/log.svg?branch=master)](https://travis-ci.org/rust-lang-nursery/log)
-[![Build status](https://ci.appveyor.com/api/projects/status/nopdjmmjt45xcrki?svg=true)](https://ci.appveyor.com/project/alexcrichton/log)
 
-* [`log` documentation](https://doc.rust-lang.org/log)
-* [`env_logger` documentation](https://doc.rust-lang.org/log/env_logger)
+`env_logger` is a de facto standard Rust logger implementation, which allows
+controlling logging to `stderr` via `RUST_LOG` environment variable.
 
-A logging facade provides a single logging API that abstracts over the actual
-logging implementation. Libraries can use the logging API provided by this
-crate, and the consumer of those libraries can choose the logging
-implementation that is most suitable for its use case.
+This is a fork of `env_logger` that makes it work as a `slog-rs` drain:
 
-## Usage
+Notable changes:
 
-## In libraries
+* Support for `slog-stdlog` to provide support for legacy `info!(...)` like
+  statements.
+* `envlogger` does not do formatting anymore: `slog-envlogger` can be composed
+  with any other `slog-rs` drains, so there's no point for it to provide it's
+  own formatting. You can now output JSON to a file, controlling it via
+  `RUST_LOG` environment var. `envlogger::init()` is provided for convenience
+  doing formatting to `stderr`
 
-Libraries should link only to the `log` crate, and use the provided macros to
-log whatever information will be useful to downstream consumers:
+### Status & news
 
-```toml
-[dependencies]
-log = "0.3"
-```
+**Warning**: Documentation has been been left mostly untouched, which means some
+places of it might be confusing.
 
-```rust
-#[macro_use]
-extern crate log;
+### How to use
 
-pub fn shave_the_yak(yak: &Yak) {
-    trace!("Commencing yak shaving");
+See `examples` directory.
 
-    loop {
-        match find_a_razor() {
-            Ok(razor) => {
-                info!("Razor located: {}", razor);
-                yak.shave(razor);
-                break;
-            }
-            Err(err) => {
-                warn!("Unable to locate a razor: {}, retrying", err);
-            }
-        }
-    }
-}
-```
-
-## In executables
-
-Executables should choose a logger implementation and initialize it early in the
-runtime of the program. Logger implementations will typically include a
-function to do this. Any log messages generated before the logger is
-initialized will be ignored.
-
-The executable itself may use the `log` crate to log as well.
-
-The `env_logger` crate provides a logger implementation that mirrors the
-functionality of the old revision of the `log` crate.
-
-```toml
-[dependencies]
-log = "0.3"
-env_logger = "0.3"
-```
+The simplest way to convert existing project to use `slog-rs`+`slog-envlogger` is:
 
 ```rust
-#[macro_use]
-extern crate log;
-extern crate env_logger;
-
 fn main() {
-    env_logger::init().unwrap();
+    slog_envlogger::init().unwrap();
 
-    info!("starting up");
-
-    // ...
+    error!("error");
+    info!("info");
+    trace!("trace");
 }
 ```
 
-## In tests
-
-Tests can use the `env_logger` crate to see log messages generated during that test:
-
-```toml
-[dependencies]
-log = "0.3"
-
-[dev-dependencies]
-env_logger = "0.3"
-```
+More proper (and powerful) version would be:
 
 ```rust
-#[macro_use]
-extern crate log;
+fn main() {
+    let term = slog_term::stderr();
+    let drain = slog_envlogger::new(term);
 
-fn add_one(num: i32) -> i32 {
-    info!("add_one called with {}", num);
-    num + 1
+    let root_logger = drain.into_logger(o!("build" => "8jdkj2df", "version" => "0.1.5"));
+
+    slog_stdlog::set_logger(root_logger.clone()).unwrap();
+
+    slog_error!(root_logger, "slog error");
+    error!("log error");
+    slog_info!(root_logger, "slog info");
+    info!("log info");
+    slog_trace!(root_logger, "slog trace");
+    trace!("log trace");
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    extern crate env_logger;
-
-    #[test]
-    fn it_adds_one() {
-        let _ = env_logger::init();
-        info!("can log from the test too");
-        assert_eq!(3, add_one(2));
-    }
-
-    #[test]
-    fn it_handles_negative_numbers() {
-        let _ = env_logger::init();
-        info!("logging from another test");
-        assert_eq!(-7, add_one(-8));
-    }
-}
-```
-
-Assuming the module under test is called `my_lib`, running the tests with the
-`RUST_LOG` filtering to info messages from this module looks like:
-
-```bash
-$ RUST_LOG=my_lib=info cargo test
-     Running target/debug/my_lib-...
-
-running 2 tests
-INFO:my_lib::tests: logging from another test
-INFO:my_lib: add_one called with -8
-test tests::it_handles_negative_numbers ... ok
-INFO:my_lib::tests: can log from the test too
-INFO:my_lib: add_one called with 2
-test tests::it_adds_one ... ok
-
-test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured
-```
-
-Note that `env_logger::init()` needs to be called in each test in which you
-want to enable logging. Additionally, the default behavior of tests to
-run in parallel means that logging output may be interleaved with test output.
-Either run tests in a single thread by specifying `RUST_TEST_THREADS=1` or by
-running one test by specifying its name as an argument to the test binaries as
-directed by the `cargo test` help docs:
-
-```bash
-$ RUST_LOG=my_lib=info cargo test it_adds_one
-     Running target/debug/my_lib-...
-
-running 1 test
-INFO:my_lib::tests: can log from the test too
-INFO:my_lib: add_one called with 2
-test tests::it_adds_one ... ok
-
-test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured
 ```

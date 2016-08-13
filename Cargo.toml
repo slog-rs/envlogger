@@ -1,36 +1,28 @@
 [package]
 
-name = "log"
-version = "0.3.6"
-authors = ["The Rust Project Developers"]
+name = "slog-envlogger"
+version = "0.1.0"
+authors = ["The Rust Project Developers", "Dawid Ciężarkiewicz <dpc@dpc.pw>"]
 license = "MIT/Apache-2.0"
 readme = "README.md"
-repository = "https://github.com/rust-lang/log"
-documentation = "https://doc.rust-lang.org/log"
-homepage = "https://github.com/rust-lang/log"
+repository = "https://github.com/dpc/slog-envlogger"
+documentation = "https://github.com/dpc/slog-envlogger"
+homepage = "https://github.com/dpc/slog-envlogger"
 description = """
-A lightweight logging facade for Rust
+Port of de facto standard logger implementation for Rust, to `slog-rs` framework.
 """
 
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+slog = "0.7.0"
+regex = "0.1"
+slog-term = "0.7.0"
+slog-stdlog = "0.7.0"
+log = "*"
+
 [[test]]
-name = "filters"
+name = "regexp_filter"
 harness = false
 
-[features]
-max_level_off   = []
-max_level_error = []
-max_level_warn  = []
-max_level_info  = []
-max_level_debug = []
-max_level_trace = []
-
-release_max_level_off   = []
-release_max_level_error = []
-release_max_level_warn  = []
-release_max_level_info  = []
-release_max_level_debug = []
-release_max_level_trace = []
-
-nightly = []
-use_std = []
-default = ["use_std"]
