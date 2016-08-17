@@ -16,11 +16,11 @@ Port of de facto standard logger implementation for Rust, to `slog-rs` framework
 path = "src/lib.rs"
 
 [dependencies]
-slog = "0.7.0"
+slog = "1.0.0-alpha"
 regex = "0.1"
-slog-term = "0.7.0"
-slog-stdlog = "0.7.0"
-log = "*"
+slog-term = "1.0.0-alpha"
+slog-stdlog = "1.0.0-alpha"
+log = "0.3.6"
 
 [[test]]
 name = "regexp_filter"
