@@ -70,3 +70,36 @@ fn main() {
     trace!("log trace");
 }
 ```
+
+Using `slog-stdlog` scopes you can make parts of the code log additional information (see [`scopes` example][scopes]):
+
+[scopes]: https://github.com/dpc/slog-envlogger/blob/master/examples/scopes.rs
+
+```rust
+fn main() {
+    slog_envlogger::init().unwrap();
+
+    error!("log error");
+
+    slog_stdlog::scope(
+        slog_stdlog::with_current_logger(|l| l.new(o!("scope-extra-data" => "data"))),
+        || foo()
+    );
+
+    trace!("log trace");
+}
+
+fn foo() {
+    info!("log info inside foo");
+
+    // scopes can be nested!
+    slog_stdlog::scope(
+        slog_stdlog::with_current_logger(|l| l.new(o!("even-more-scope-extra-data" => "data2"))),
+        || bar()
+    );
+}
+
+fn bar() {
+    info!("log info inside bar");
+}
+```
