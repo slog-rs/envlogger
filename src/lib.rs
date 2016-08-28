@@ -317,22 +317,22 @@ mod tests {
 
     use super::{LogBuilder, EnvLogger, LogDirective, parse_logging_spec};
 
-    fn make_logger(dirs: Vec<LogDirective>) -> EnvLogger<slog::drain::Discard> {
-        let mut logger = LogBuilder::new(slog::drain::discard()).build();
+    fn make_logger(dirs: Vec<LogDirective>) -> EnvLogger<slog::Discard> {
+        let mut logger = LogBuilder::new(slog::discard()).build();
         logger.directives = dirs;
         logger
     }
 
     #[test]
     fn filter_info() {
-        let logger = LogBuilder::new(slog::drain::discard()).filter(None, FilterLevel::Info).build();
+        let logger = LogBuilder::new(slog::discard()).filter(None, FilterLevel::Info).build();
         assert!(logger.enabled(Level::Info, "crate1"));
         assert!(!logger.enabled(Level::Debug, "crate1"));
     }
 
     #[test]
     fn filter_beginning_longest_match() {
-        let logger = LogBuilder::new(slog::drain::discard())
+        let logger = LogBuilder::new(slog::discard())
                         .filter(Some("crate2"), FilterLevel::Info)
                         .filter(Some("crate2::mod"), FilterLevel::Debug)
                         .filter(Some("crate1::mod1"), FilterLevel::Warning)
@@ -343,7 +343,7 @@ mod tests {
 
     #[test]
     fn parse_default() {
-        let logger = LogBuilder::new(slog::drain::discard()).parse("info,crate1::mod1=warn").build();
+        let logger = LogBuilder::new(slog::discard()).parse("info,crate1::mod1=warn").build();
         assert!(logger.enabled(Level::Warning, "crate1::mod1"));
         assert!(logger.enabled(Level::Info, "crate2::mod2"));
     }
