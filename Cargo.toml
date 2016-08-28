@@ -1,7 +1,7 @@
 [package]
 
 name = "slog-envlogger"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["The Rust Project Developers", "Dawid Ciężarkiewicz <dpc@dpc.pw>"]
 license = "MIT/Apache-2.0"
 readme = "README.md"
@@ -16,10 +16,10 @@ Port of de facto standard logger implementation for Rust, to `slog-rs` framework
 path = "src/lib.rs"
 
 [dependencies]
-slog = "1.0.0-alpha"
+slog = "1.0.0-alpha2"
 regex = "0.1"
-slog-term = "1.0.0-alpha"
-slog-stdlog = "1.0.0-alpha3"
+slog-term = "1.0.0-alpha2"
+slog-stdlog = "1.0.0-alpha4"
 log = "0.3.6"
 
 [[test]]
