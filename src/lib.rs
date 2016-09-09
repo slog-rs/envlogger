@@ -79,7 +79,7 @@ extern crate slog_stdlog;
 extern crate log;
 
 use regex::Regex;
-use std::env;
+use std::{env, io};
 
 use slog::*;
 
@@ -202,7 +202,7 @@ impl<T : Drain> EnvLogger<T> {
 }
 
 impl<T : Drain> Drain for EnvLogger<T> {
-    fn log(&self, buf: &mut Vec<u8>, info: &Record, val : &OwnedKeyValueList) -> slog::Result<()> {
+    fn log(&self, info: &Record, val : &OwnedKeyValueList) -> io::Result<()> {
         if !self.enabled(info.level(), info.module()) {
             return Ok(());
         }
@@ -213,7 +213,7 @@ impl<T : Drain> Drain for EnvLogger<T> {
             }
         }
 
-        self.drain.log(buf, info, val)
+        self.drain.log(info, val)
     }
 }
 
@@ -243,7 +243,7 @@ pub fn new<T : Drain>(d : T) -> EnvLogger<T> {
 /// anything that `slog` has to offer, so I highly encourage to use `new()`
 /// instead and explicitly configure your loggers.
 pub fn init() -> std::result::Result<(), log::SetLoggerError> {
-    let term = slog_term::stderr();
+    let term = slog_term::streamer().compact().build();
     let drain = new(term);
 
     slog_stdlog::set_logger(Logger::root(drain, o!()))
