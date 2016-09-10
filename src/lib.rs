@@ -243,7 +243,7 @@ pub fn new<T : Drain>(d : T) -> EnvLogger<T> {
 /// anything that `slog` has to offer, so I highly encourage to use `new()`
 /// instead and explicitly configure your loggers.
 pub fn init() -> std::result::Result<(), log::SetLoggerError> {
-    let term = slog_term::streamer().compact().build();
+    let term = slog_term::streamer().compact().stderr().build();
     let drain = new(term);
 
     slog_stdlog::set_logger(Logger::root(drain, o!()))

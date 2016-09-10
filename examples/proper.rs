@@ -10,7 +10,7 @@ extern crate slog;
 extern crate log;
 
 fn main() {
-    let term = slog_term::stderr();
+    let term = slog_term::streamer().build();
     let drain = slog_envlogger::new(term);
 
     let root_logger = slog::Logger::root(drain, o!("build" => "8jdkj2df", "version" => "0.1.5"));
