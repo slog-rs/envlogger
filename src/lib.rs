@@ -79,8 +79,8 @@ extern crate slog_stdlog;
 extern crate log;
 
 use regex::Regex;
-use std::{env, io};
-
+use std::{env};
+use std::result;
 use slog::*;
 
 /// `EnvLogger` drain.
@@ -202,13 +202,14 @@ impl<T : Drain> EnvLogger<T> {
 }
 
 impl<T : Drain> Drain for EnvLogger<T> {
-    fn log(&self, info: &Record, val : &OwnedKeyValueList) -> io::Result<()> {
+    type Error = T::Error;
+    fn log(&self, info: &Record, val : &OwnedKeyValueList) -> result::Result<(), T::Error> {
         if !self.enabled(info.level(), info.module()) {
             return Ok(());
         }
 
         if let Some(filter) = self.filter.as_ref() {
-            if !filter.is_match(&info.msg()) {
+            if !filter.is_match(&format!("{}", info.msg())) {
                 return Ok(());
             }
         }
@@ -246,7 +247,7 @@ pub fn init() -> std::result::Result<(), log::SetLoggerError> {
     let term = slog_term::streamer().compact().stderr().build();
     let drain = new(term);
 
-    slog_stdlog::set_logger(Logger::root(drain, o!()))
+    slog_stdlog::set_logger(Logger::root(drain.ignore_err(), o!()))
 }
 
 /// Parse a logging specification string (e.g: "crate1,crate2::mod3,crate3::x=error/foo")

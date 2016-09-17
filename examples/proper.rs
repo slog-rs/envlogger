@@ -6,6 +6,8 @@ extern crate slog_term;
 #[macro_use(slog_error, slog_info, slog_trace, slog_log, o)]
 extern crate slog;
 
+use slog::DrainExt;
+
 #[macro_use]
 extern crate log;
 
@@ -13,7 +15,7 @@ fn main() {
     let term = slog_term::streamer().build();
     let drain = slog_envlogger::new(term);
 
-    let root_logger = slog::Logger::root(drain, o!("build" => "8jdkj2df", "version" => "0.1.5"));
+    let root_logger = slog::Logger::root(drain.fuse(), o!("build" => "8jdkj2df", "version" => "0.1.5"));
 
     slog_stdlog::set_logger(root_logger.clone()).unwrap();
 
