@@ -79,9 +79,13 @@ extern crate slog_stdlog;
 extern crate log;
 
 use regex::Regex;
-use std::{env};
-use std::result;
+use std::{env, result};
+use std::cell::RefCell;
 use slog::*;
+
+thread_local! {
+    static TL_BUF: RefCell<String> = RefCell::new(String::new())
+}
 
 /// `EnvLogger` drain.
 pub struct EnvLogger<T : Drain> {
@@ -209,12 +213,20 @@ impl<T : Drain> Drain for EnvLogger<T> {
         }
 
         if let Some(filter) = self.filter.as_ref() {
-            if !filter.is_match(&format!("{}", info.msg())) {
-                return Ok(());
-            }
+            TL_BUF.with(|buf| {
+                let mut buf = buf.borrow_mut();
+                if filter.is_match(&format!("{}", info.msg())) {
+                    let res = self.drain.log(info, val);
+                    buf.clear();
+                    res
+                } else {
+                    Ok(())
+                }
+            })
+        } else {
+            Ok(())
         }
 
-        self.drain.log(info, val)
     }
 }
 
