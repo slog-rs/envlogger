@@ -39,67 +39,13 @@ places of it might be confusing.
 
 See `examples` directory.
 
-The simplest way to convert existing project to use `slog-rs`+`slog-envlogger` is:
+The simplest way to convert existing project to use `slog-rs`+`slog-envlogger`
+is shown in
+[`simple` example](https://github.com/slog-rs/envlogger/blob/master/examples/simple.rs)
 
-```rust
-fn main() {
-    slog_envlogger::init().unwrap();
-
-    error!("error");
-    info!("info");
-    trace!("trace");
-}
-```
-
-More proper (and powerful) version would be:
-
-```rust
-fn main() {
-    let term = slog_term::stderr();
-    let drain = slog_envlogger::new(term);
-
-    let root_logger = drain.into_logger(o!("build" => "8jdkj2df", "version" => "0.1.5"));
-
-    slog_stdlog::set_logger(root_logger.clone()).unwrap();
-
-    slog_error!(root_logger, "slog error");
-    error!("log error");
-    slog_info!(root_logger, "slog info");
-    info!("log info");
-    slog_trace!(root_logger, "slog trace");
-    trace!("log trace");
-}
-```
+For more proper (and powerful) version see
+[`proper` example](https://github.com/slog-rs/envlogger/blob/master/examples/proper.rs)
 
 Using `slog-stdlog` scopes you can make parts of the code log additional information (see [`scopes` example][scopes]):
 
 [scopes]: https://github.com/dpc/slog-envlogger/blob/master/examples/scopes.rs
-
-```rust
-fn main() {
-    slog_envlogger::init().unwrap();
-
-    error!("log error");
-
-    slog_stdlog::scope(
-        slog_stdlog::with_current_logger(|l| l.new(o!("scope-extra-data" => "data"))),
-        || foo()
-    );
-
-    trace!("log trace");
-}
-
-fn foo() {
-    info!("log info inside foo");
-
-    // scopes can be nested!
-    slog_stdlog::scope(
-        slog_stdlog::with_current_logger(|l| l.new(o!("even-more-scope-extra-data" => "data2"))),
-        || bar()
-    );
-}
-
-fn bar() {
-    info!("log info inside bar");
-}
-```
