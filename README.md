@@ -11,9 +11,8 @@
       <img src="https://img.shields.io/badge/GITTER-join%20chat-green.svg?style=flat-square" alt="Gitter Chat">
   </a>
   <br>
-  <strong><a href="https://docs.rs/slog-envlogger/0.5.0/slog_envlogger/">Documentation</a></strong>
+  <strong><a href="https://docs.rs/slog-envlogger/">Documentation</a></strong>
 </p>
-
 
 `env_logger` is a de facto standard Rust logger implementation, which allows
 controlling logging to `stderr` via the `RUST_LOG` environment variable.
@@ -48,4 +47,4 @@ For more proper (and powerful) version see
 
 Using `slog-stdlog` scopes you can make parts of the code log additional information (see [`scopes` example][scopes]):
 
-[scopes]: https://github.com/dpc/slog-envlogger/blob/master/examples/scopes.rs
+[scopes]: examples/scopes.rs
