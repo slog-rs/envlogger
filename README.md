@@ -1,4 +1,4 @@
-# slog-envlogger - Port of `env_logger` as a `slog-rs` drain
+# `slog-envlogger` - Port of `env_logger` as a `slog-rs` drain
 
 <p align="center">
   <a href="https://travis-ci.org/dpc/slog-envlogger">
@@ -11,12 +11,11 @@
       <img src="https://img.shields.io/badge/GITTER-join%20chat-green.svg?style=flat-square" alt="Gitter Chat">
   </a>
   <br>
-  <strong><a href="//dpc.github.io/slog-envlogger/">Documentation</a></strong>
+  <strong><a href="https://docs.rs/slog-envlogger/">Documentation</a></strong>
 </p>
 
-
 `env_logger` is a de facto standard Rust logger implementation, which allows
-controlling logging to `stderr` via `RUST_LOG` environment variable.
+controlling logging to `stderr` via the `RUST_LOG` environment variable.
 
 This is a fork of `env_logger` that makes it work as a `slog-rs` drain:
 
@@ -41,11 +40,11 @@ See `examples` directory.
 
 The simplest way to convert existing project to use `slog-rs`+`slog-envlogger`
 is shown in
-[`simple` example](https://github.com/slog-rs/envlogger/blob/master/examples/simple.rs)
+[`simple` example](examples/simple.rs)
 
 For more proper (and powerful) version see
-[`proper` example](https://github.com/slog-rs/envlogger/blob/master/examples/proper.rs)
+[`proper` example](examples/proper.rs)
 
 Using `slog-stdlog` scopes you can make parts of the code log additional information (see [`scopes` example][scopes]):
 
-[scopes]: https://github.com/dpc/slog-envlogger/blob/master/examples/scopes.rs
+[scopes]: examples/scopes.rs
