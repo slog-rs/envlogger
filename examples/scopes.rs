@@ -1,5 +1,6 @@
 extern crate slog_stdlog;
 extern crate slog_envlogger;
+extern crate slog_scope;
 
 #[macro_use(o)]
 extern crate slog;
@@ -12,8 +13,8 @@ fn main() {
 
     error!("log error");
 
-    slog_stdlog::scope(
-        slog_stdlog::with_current_logger(|l| l.new(o!("scope-extra-data" => "data"))),
+    slog_scope::scope(
+        slog_scope::logger().new(o!("scope-extra-data" => "data")),
         || foo()
     );
 
@@ -24,8 +25,8 @@ fn foo() {
     info!("log info inside foo");
 
     // scopes can be nested!
-    slog_stdlog::scope(
-        slog_stdlog::with_current_logger(|l| l.new(o!("even-more-scope-extra-data" => "data2"))),
+    slog_scope::scope(
+        slog_scope::logger().new(o!("even-more-scope-extra-data" => "data2")),
         || bar()
     );
 }

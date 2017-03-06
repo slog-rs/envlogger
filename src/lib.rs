@@ -76,10 +76,12 @@ extern crate regex;
 extern crate slog;
 extern crate slog_term;
 extern crate slog_stdlog;
+extern crate slog_scope;
+extern crate slog_async;
 extern crate log;
 
 use regex::Regex;
-use std::{env, result};
+use std::{env, result, sync};
 use std::cell::RefCell;
 use slog::*;
 
@@ -205,9 +207,11 @@ impl<T : Drain> EnvLogger<T> {
     }
 }
 
-impl<T : Drain> Drain for EnvLogger<T> {
-    type Error = T::Error;
-    fn log(&self, info: &Record, val : &OwnedKeyValueList) -> result::Result<(), T::Error> {
+impl<T : Drain> Drain for EnvLogger<T>
+where T : Drain<Ok=()> {
+    type Err = T::Err;
+    type Ok = ();
+    fn log(&self, info: &Record, val : &OwnedKVList) -> result::Result<(), T::Err> {
         if !self.enabled(info.level(), info.module()) {
             return Ok(());
         }
@@ -253,10 +257,14 @@ pub fn new<T : Drain>(d : T) -> EnvLogger<T> {
 /// anything that `slog` has to offer, so I highly encourage to use `new()`
 /// instead and explicitly configure your loggers.
 pub fn init() -> std::result::Result<(), log::SetLoggerError> {
-    let term = slog_term::streamer().full().sync().stderr().build();
-    let drain = new(term);
+    let drain = slog_term::CompactFormat::new(
+        slog_term::TermDecorator::new().stderr().build()
+        ).build();
+    let drain = new(drain);
+    let drain = sync::Mutex::new(drain.fuse());
 
-    slog_stdlog::set_logger(Logger::root(drain.fuse(), o!()))
+    slog_scope::set_global_logger(Logger::root(drain.fuse(), o!()).into_erased());
+    slog_stdlog::init()
 }
 
 /// Parse a logging specification string (e.g: "crate1,crate2::mod3,crate3::x=error/foo")
