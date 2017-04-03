@@ -14,7 +14,7 @@ fn main() {
 }
 
 fn child_main() {
-    slog_envlogger::init().unwrap();
+    let _guard =slog_envlogger::init().unwrap();
     info!("XYZ Message");
 }
 

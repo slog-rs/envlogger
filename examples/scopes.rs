@@ -2,14 +2,14 @@ extern crate slog_stdlog;
 extern crate slog_envlogger;
 extern crate slog_scope;
 
-#[macro_use(o)]
+#[macro_use(o, kv)]
 extern crate slog;
 
 #[macro_use]
 extern crate log;
 
 fn main() {
-    slog_envlogger::init().unwrap();
+    let _guard = slog_envlogger::init().unwrap();
 
     error!("log error");
 
