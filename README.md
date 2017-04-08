@@ -1,4 +1,10 @@
 <p align="center">
+
+  <a href="https://github.com/slog-rs/slog">
+  <img src="https://cdn.rawgit.com/slog-rs/misc/master/media/slog.svg" alt="slog-rs logo">
+  </a>
+  <br>
+
   <a href="https://travis-ci.org/slog-rs/envlogger">
       <img src="https://img.shields.io/travis/slog-rs/envlogger/master.svg?style=flat-square" alt="Travis CI Build Status">
   </a>
