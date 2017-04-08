@@ -18,7 +18,7 @@
   <strong><a href="https://docs.rs/slog-envlogger/">Documentation</a></strong>
 </p>
 
-# `slog-envlogger` - Port of `env_logger` as a [`slog-rs`[slog-rs] drain
+# `slog-envlogger` - Port of `env_logger` as a [`slog-rs`][slog-rs] drain
 
 `env_logger` is a de facto standard Rust logger implementation, which allows
 controlling logging to `stderr` via the `RUST_LOG` environment variable.
