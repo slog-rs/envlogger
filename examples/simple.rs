@@ -5,7 +5,7 @@ extern crate slog_envlogger;
 extern crate log;
 
 fn main() {
-    slog_envlogger::init().unwrap();
+    let _guard = slog_envlogger::init().unwrap();
 
     error!("error");
     info!("info");
