@@ -10,7 +10,6 @@ extern crate slog_async;
 extern crate slog;
 
 use slog::Drain;
-use std::sync::Arc;
 
 #[macro_use]
 extern crate log;
@@ -25,13 +24,12 @@ fn main() {
             ).build().fuse()
         ));
 
-    let root_logger = slog::Logger::root(Arc::new(drain.fuse()),
+    let root_logger = slog::Logger::root(drain.fuse(),
                                          slog_o!("build" => "8jdkj2df", "version" => "0.1.5"));
 
     slog_stdlog::init().unwrap();
 
-    //slog_scope::set_global_logger(root_logger.clone().into_erased());
-    slog_scope::scope(root_logger.clone().into_erased(), || {
+    slog_scope::scope(&root_logger, || {
 
         slog_error!(root_logger, "slog error");
         error!("log error");

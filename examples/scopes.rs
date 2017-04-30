@@ -14,7 +14,7 @@ fn main() {
     error!("log error");
 
     slog_scope::scope(
-        slog_scope::logger().new(o!("scope-extra-data" => "data")),
+        &slog_scope::logger().new(o!("scope-extra-data" => "data")),
         || foo()
     );
 
@@ -26,7 +26,7 @@ fn foo() {
 
     // scopes can be nested!
     slog_scope::scope(
-        slog_scope::logger().new(o!("even-more-scope-extra-data" => "data2")),
+        &slog_scope::logger().new(o!("even-more-scope-extra-data" => "data2")),
         || bar()
     );
 }
