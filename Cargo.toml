@@ -17,7 +17,7 @@ path = "src/lib.rs"
 
 [dependencies]
 slog = "2"
-regex = "0.1"
+regex = { version = "0.1", optional = true }
 slog-term = "2"
 slog-stdlog = "2"
 slog-scope = "3"
@@ -28,3 +28,5 @@ log = "0.3.6"
 name = "regexp_filter"
 harness = false
 
+[features]
+default = ["regex"]
