@@ -76,7 +76,6 @@ extern crate slog;
 extern crate slog_term;
 extern crate slog_stdlog;
 extern crate slog_scope;
-extern crate slog_async;
 extern crate log;
 
 use std::{env, result, sync};
