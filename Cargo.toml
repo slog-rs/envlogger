@@ -17,14 +17,18 @@ path = "src/lib.rs"
 
 [dependencies]
 slog = "2"
-regex = "0.1"
+regex = { version = "0.2", optional = true }
 slog-term = "2"
 slog-stdlog = "2"
 slog-scope = "3"
-slog-async = "2"
 log = "0.3.6"
+
+[dev-dependencies]
+slog-async = "2"
 
 [[test]]
 name = "regexp_filter"
 harness = false
 
+[features]
+default = ["regex"]
