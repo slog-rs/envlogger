@@ -9,7 +9,7 @@
       <img src="https://img.shields.io/travis/slog-rs/envlogger/master.svg?style=flat-square" alt="Travis CI Build Status">
   </a>
   <a href="https://crates.io/crates/slog-envlogger">
-      <img src="http://meritbadge.herokuapp.com/slog?style=flat-square" alt="crates.io">
+      <img src="http://meritbadge.herokuapp.com/slog-envlogger?style=flat-square" alt="crates.io">
   </a>
   <a href="https://gitter.im/slog-rs/slog">
       <img src="https://img.shields.io/gitter/room/slog-rs/slog.svg" alt="slog-rs Gitter Chat">
