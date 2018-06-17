@@ -22,7 +22,7 @@ slog-term = "2"
 slog-stdlog = "3"
 slog-scope = "4"
 slog-async = "2"
-log = "0.3.6"
+log = { version = "0.4.2", features = ["std"] }
 
 [dev-dependencies]
 slog-async = "2"
@@ -33,3 +33,4 @@ harness = false
 
 [features]
 default = ["regex"]
+
