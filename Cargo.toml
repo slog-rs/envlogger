@@ -34,3 +34,7 @@ harness = false
 [features]
 default = ["regex"]
 
+[patch.crates-io]
+slog = { git = "https://github.com/jacekchmiel/slog", branch = "log-0.4-support" }
+slog-async = { git = "https://github.com/jacekchmiel/slog-async", branch = "log-0.4-support" }
+slog-stdlog = { git = "https://github.com/jacekchmiel/slog-stdlog", branch = "log-0.4-support" }
