@@ -16,13 +16,13 @@ Port of de facto standard logger implementation for Rust, to `slog-rs` framework
 path = "src/lib.rs"
 
 [dependencies]
-slog = "2"
+slog = "~2.2.3"
 regex = { version = "0.2", optional = true }
 slog-term = "2"
-slog-stdlog = "3"
+slog-stdlog = "3.0.3-pre"
 slog-scope = "4"
 slog-async = "2"
-log = "0.3.6"
+log = { version = "0.4.2", features = ["std"] }
 
 [dev-dependencies]
 slog-async = "2"
@@ -33,3 +33,8 @@ harness = false
 
 [features]
 default = ["regex"]
+
+[patch.crates-io]
+slog = { git = "https://github.com/jacekchmiel/slog", branch = "log-0.4-support" }
+slog-async = { git = "https://github.com/jacekchmiel/slog-async", branch = "log-0.4-support" }
+slog-stdlog = { git = "https://github.com/jacekchmiel/slog-stdlog", branch = "log-0.4-support" }
