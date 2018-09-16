@@ -16,7 +16,7 @@ Port of de facto standard logger implementation for Rust, to `slog-rs` framework
 path = "src/lib.rs"
 
 [dependencies]
-slog = "2.2"
+slog = "~2.2.3"
 regex = { version = "0.2", optional = true }
 slog-term = "2"
 slog-stdlog = "3.0.3-pre"
