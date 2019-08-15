@@ -17,12 +17,12 @@ path = "src/lib.rs"
 
 [dependencies]
 slog = "2"
-regex = { version = "0.2", optional = true }
+regex = { version = "1.2", optional = true }
 slog-term = "2"
-slog-stdlog = "3"
+slog-stdlog = "4"
 slog-scope = "4"
 slog-async = "2"
-log = "0.3.6"
+log = "0.4"
 
 [dev-dependencies]
 slog-async = "2"

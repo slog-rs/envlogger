@@ -71,7 +71,6 @@
        html_root_url = "http://doc.rust-lang.org/env_logger/")]
 #![cfg_attr(test, deny(warnings))]
 
-#[macro_use]
 extern crate slog;
 extern crate slog_term;
 extern crate slog_stdlog;
