@@ -1,5 +1,5 @@
-extern crate slog_stdlog;
 extern crate slog_envlogger;
+extern crate slog_stdlog;
 
 #[macro_use]
 extern crate log;

@@ -6,7 +6,9 @@ pub struct Filter {
 
 impl Filter {
     pub fn new(spec: &str) -> Result<Filter, String> {
-        Ok(Filter { inner: spec.to_string() })
+        Ok(Filter {
+            inner: spec.to_string(),
+        })
     }
 
     pub fn is_match(&self, s: &str) -> bool {
