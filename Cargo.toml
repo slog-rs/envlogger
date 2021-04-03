@@ -18,11 +18,10 @@ path = "src/lib.rs"
 [dependencies]
 slog = "2"
 regex = { version = "1.2", optional = true }
-slog-term = "2"
-slog-stdlog = "4"
-slog-scope = "4"
-slog-async = "2"
-log = "0.4"
+slog-term = { version = "2", optional = true }
+slog-stdlog = { version = "4", optional = true }
+slog-scope = { version = "4", optional = true }
+log = { version = "0.4", optional = true }
 
 [dev-dependencies]
 slog-async = "2"
@@ -32,4 +31,5 @@ name = "regexp_filter"
 harness = false
 
 [features]
-default = ["regex"]
+init = ["slog-term", "slog-stdlog", "slog-scope", "log"]
+default = ["regex", "init"]

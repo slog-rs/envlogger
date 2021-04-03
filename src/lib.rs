@@ -72,12 +72,8 @@
 #![cfg_attr(test, deny(warnings))]
 
 extern crate slog;
-extern crate slog_term;
-extern crate slog_stdlog;
-extern crate slog_scope;
-extern crate log;
 
-use std::{env, result, sync};
+use std::{env, result};
 use std::cell::RefCell;
 use slog::*;
 
@@ -88,6 +84,13 @@ mod filter;
 #[cfg(not(feature = "regex"))]
 #[path = "string.rs"]
 mod filter;
+
+#[cfg(feature = "init")]
+#[path = "init.rs"]
+mod init;
+
+#[cfg(feature = "init")]
+pub use init::init;
 
 thread_local! {
     static TL_BUF: RefCell<String> = RefCell::new(String::new())
@@ -249,28 +252,6 @@ pub fn new<T : Drain>(d : T) -> EnvLogger<T> {
     }
 
     builder.build()
-}
-
-/// Use a default `EnvLogger` as global logging drain
-///
-/// This is for lazy devs that with minimal amount of work want to convert
-/// software that used standard Rust `env_logger` crate to
-/// `slog-env_logger`.
-///
-/// It's an easy first step, but using `init()` you're not gaining almost
-/// anything that `slog` has to offer, so I highly encourage to use `new()`
-/// instead and explicitly configure your loggers.
-pub fn init() -> std::result::Result<slog_scope::GlobalLoggerGuard, log::SetLoggerError> {
-    let drain = slog_term::CompactFormat::new(
-        slog_term::TermDecorator::new().stderr().build()
-        ).build();
-    let drain = new(drain);
-    let drain = sync::Mutex::new(drain.fuse());
-
-    let guard = slog_scope::set_global_logger(Logger::root(drain.fuse(), o!()).into_erased());
-    slog_stdlog::init()?;
-
-    Ok(guard)
 }
 
 /// Parse a logging specification string (e.g: "crate1,crate2::mod3,crate3::x=error/foo")
