@@ -66,16 +66,18 @@
 //!   warn for hello. In both cases the log message must include a single digit
 //!   number followed by 'scopes'.
 
-#![doc(html_logo_url = "http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png",
-       html_favicon_url = "http://www.rust-lang.org/favicon.ico",
-       html_root_url = "http://doc.rust-lang.org/env_logger/")]
+#![doc(
+    html_logo_url = "http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png",
+    html_favicon_url = "http://www.rust-lang.org/favicon.ico",
+    html_root_url = "http://doc.rust-lang.org/env_logger/"
+)]
 #![cfg_attr(test, deny(warnings))]
 
 extern crate slog;
 
-use std::{env, result};
-use std::cell::RefCell;
 use slog::*;
+use std::cell::RefCell;
+use std::{env, result};
 
 #[cfg(feature = "regex")]
 #[path = "regex.rs"]
@@ -97,8 +99,8 @@ thread_local! {
 }
 
 /// `EnvLogger` drain.
-pub struct EnvLogger<T : Drain> {
-    drain : T,
+pub struct EnvLogger<T: Drain> {
+    drain: T,
     directives: Vec<LogDirective>,
     filter: Option<filter::Filter>,
 }
@@ -106,17 +108,17 @@ pub struct EnvLogger<T : Drain> {
 /// LogBuilder acts as builder for initializing the EnvLogger.
 /// It can be used change the enviromental variable used
 /// to provide the logging directives and also set the default log level filter.
-pub struct LogBuilder<T : Drain> {
-    drain : T,
+pub struct LogBuilder<T: Drain> {
+    drain: T,
     directives: Vec<LogDirective>,
     filter: Option<filter::Filter>,
 }
 
-impl<T : Drain> LogBuilder<T> {
+impl<T: Drain> LogBuilder<T> {
     /// Initializes the log builder with defaults
-    pub fn new(d : T) -> Self {
+    pub fn new(d: T) -> Self {
         LogBuilder {
-            drain : d,
+            drain: d,
             directives: Vec::new(),
             filter: None,
         }
@@ -126,9 +128,7 @@ impl<T : Drain> LogBuilder<T> {
     ///
     /// The given module (if any) will log at most the specified level provided.
     /// If no module is provided then the filter will apply to all log messages.
-    pub fn filter(mut self,
-                  module: Option<&str>,
-                  level: FilterLevel) -> Self {
+    pub fn filter(mut self, module: Option<&str>, level: FilterLevel) -> Self {
         self.directives.push(LogDirective {
             name: module.map(|s| s.to_string()),
             level: level,
@@ -183,8 +183,8 @@ impl<T : Drain> LogBuilder<T> {
     }
 }
 
-impl<T : Drain> EnvLogger<T> {
-    pub fn new(d : T) -> Self {
+impl<T: Drain> EnvLogger<T> {
+    pub fn new(d: T) -> Self {
         let mut builder = LogBuilder::new(d);
 
         if let Ok(s) = env::var("RUST_LOG") {
@@ -195,8 +195,10 @@ impl<T : Drain> EnvLogger<T> {
     }
 
     pub fn filter(&self) -> FilterLevel {
-        self.directives.iter()
-            .map(|d| d.level).max()
+        self.directives
+            .iter()
+            .map(|d| d.level)
+            .max()
             .unwrap_or(FilterLevel::Off)
     }
 
@@ -204,28 +206,28 @@ impl<T : Drain> EnvLogger<T> {
         // Search for the longest match, the vector is assumed to be pre-sorted.
         for directive in self.directives.iter().rev() {
             match directive.name {
-                Some(ref name) if !module.starts_with(&**name) => {},
-                Some(..) | None => {
-                    return level.as_usize() <= directive.level.as_usize()
-                }
+                Some(ref name) if !module.starts_with(&**name) => {}
+                Some(..) | None => return level.as_usize() <= directive.level.as_usize(),
             }
         }
         false
     }
 }
 
-impl<T : Drain> Drain for EnvLogger<T>
-where T : Drain<Ok=()> {
+impl<T: Drain> Drain for EnvLogger<T>
+where
+    T: Drain<Ok = ()>,
+{
     type Err = T::Err;
     type Ok = ();
-    fn log(&self, info: &Record, val : &OwnedKVList) -> result::Result<(), T::Err> {
+    fn log(&self, info: &Record, val: &OwnedKVList) -> result::Result<(), T::Err> {
         if !self.enabled(info.level(), info.module()) {
             return Ok(());
         }
 
         if let Some(filter) = self.filter.as_ref() {
             if !filter.is_match(&format!("{}", info.msg())) {
-                return Ok(())
+                return Ok(());
             }
         }
 
@@ -244,7 +246,7 @@ struct LogDirective {
 }
 
 /// Create a `EnvLogger` using `RUST_LOG` environment variable
-pub fn new<T : Drain>(d : T) -> EnvLogger<T> {
+pub fn new<T: Drain>(d: T) -> EnvLogger<T> {
     let mut builder = LogBuilder::new(d);
 
     if let Ok(s) = env::var("RUST_LOG") {
@@ -263,52 +265,62 @@ fn parse_logging_spec(spec: &str) -> (Vec<LogDirective>, Option<filter::Filter>)
     let mods = parts.next();
     let filter = parts.next();
     if parts.next().is_some() {
-        println!("warning: invalid logging spec '{}', \
-                 ignoring it (too many '/'s)", spec);
+        println!(
+            "warning: invalid logging spec '{}', \
+                 ignoring it (too many '/'s)",
+            spec
+        );
         return (dirs, None);
     }
-    mods.map(|m| { for s in m.split(',') {
-        if s.len() == 0 { continue }
-        let mut parts = s.split('=');
-        let (log_level, name) = match (parts.next(), parts.next().map(|s| s.trim()), parts.next()) {
-            (Some(part0), None, None) => {
-                // if the single argument is a log-level string or number,
-                // treat that as a global fallback
-                match part0.parse() {
-                    Ok(num) => (num, None),
-                    Err(_) => (FilterLevel::max(), Some(part0)),
-                }
+    mods.map(|m| {
+        for s in m.split(',') {
+            if s.len() == 0 {
+                continue;
             }
-            (Some(part0), Some(""), None) => (FilterLevel::max(), Some(part0)),
-            (Some(part0), Some(part1), None) => {
-                match part1.parse() {
-                    Ok(num) => (num, Some(part0)),
-                    _ => {
-                        println!("warning: invalid logging spec '{}', \
-                                 ignoring it", part1);
-                        continue
+            let mut parts = s.split('=');
+            let (log_level, name) =
+                match (parts.next(), parts.next().map(|s| s.trim()), parts.next()) {
+                    (Some(part0), None, None) => {
+                        // if the single argument is a log-level string or number,
+                        // treat that as a global fallback
+                        match part0.parse() {
+                            Ok(num) => (num, None),
+                            Err(_) => (FilterLevel::max(), Some(part0)),
+                        }
                     }
-                }
-            },
-            _ => {
-                println!("warning: invalid logging spec '{}', \
-                         ignoring it", s);
-                continue
-            }
-        };
-        dirs.push(LogDirective {
-            name: name.map(|s| s.to_string()),
-            level: log_level,
-        });
-    }});
+                    (Some(part0), Some(""), None) => (FilterLevel::max(), Some(part0)),
+                    (Some(part0), Some(part1), None) => match part1.parse() {
+                        Ok(num) => (num, Some(part0)),
+                        _ => {
+                            println!(
+                                "warning: invalid logging spec '{}', \
+                                 ignoring it",
+                                part1
+                            );
+                            continue;
+                        }
+                    },
+                    _ => {
+                        println!(
+                            "warning: invalid logging spec '{}', \
+                         ignoring it",
+                            s
+                        );
+                        continue;
+                    }
+                };
+            dirs.push(LogDirective {
+                name: name.map(|s| s.to_string()),
+                level: log_level,
+            });
+        }
+    });
 
-    let filter = filter.map_or(None, |filter| {
-        match filter::Filter::new(filter) {
-            Ok(re) => Some(re),
-            Err(e) => {
-                println!("warning: invalid regex filter - {}", e);
-                None
-            }
+    let filter = filter.map_or(None, |filter| match filter::Filter::new(filter) {
+        Ok(re) => Some(re),
+        Err(e) => {
+            println!("warning: invalid regex filter - {}", e);
+            None
         }
     });
 
@@ -317,10 +329,10 @@ fn parse_logging_spec(spec: &str) -> (Vec<LogDirective>, Option<filter::Filter>)
 
 #[cfg(test)]
 mod tests {
-    use slog::{Level, FilterLevel};
     use super::slog;
+    use slog::{FilterLevel, Level};
 
-    use super::{LogBuilder, EnvLogger, LogDirective, parse_logging_spec};
+    use super::{parse_logging_spec, EnvLogger, LogBuilder, LogDirective};
 
     fn make_logger(dirs: Vec<LogDirective>) -> EnvLogger<slog::Discard> {
         let mut logger = LogBuilder::new(slog::Discard).build();
@@ -330,7 +342,9 @@ mod tests {
 
     #[test]
     fn filter_info() {
-        let logger = LogBuilder::new(slog::Discard).filter(None, FilterLevel::Info).build();
+        let logger = LogBuilder::new(slog::Discard)
+            .filter(None, FilterLevel::Info)
+            .build();
         assert!(logger.enabled(Level::Info, "crate1"));
         assert!(!logger.enabled(Level::Debug, "crate1"));
     }
@@ -338,17 +352,19 @@ mod tests {
     #[test]
     fn filter_beginning_longest_match() {
         let logger = LogBuilder::new(slog::Discard)
-                        .filter(Some("crate2"), FilterLevel::Info)
-                        .filter(Some("crate2::mod"), FilterLevel::Debug)
-                        .filter(Some("crate1::mod1"), FilterLevel::Warning)
-                        .build();
+            .filter(Some("crate2"), FilterLevel::Info)
+            .filter(Some("crate2::mod"), FilterLevel::Debug)
+            .filter(Some("crate1::mod1"), FilterLevel::Warning)
+            .build();
         assert!(logger.enabled(Level::Debug, "crate2::mod1"));
         assert!(!logger.enabled(Level::Debug, "crate2"));
     }
 
     #[test]
     fn parse_default() {
-        let logger = LogBuilder::new(slog::Discard).parse("info,crate1::mod1=warn").build();
+        let logger = LogBuilder::new(slog::Discard)
+            .parse("info,crate1::mod1=warn")
+            .build();
         assert!(logger.enabled(Level::Warning, "crate1::mod1"));
         assert!(logger.enabled(Level::Info, "crate2::mod2"));
     }
@@ -358,12 +374,12 @@ mod tests {
         let logger = make_logger(vec![
             LogDirective {
                 name: Some("crate2".to_string()),
-                level: FilterLevel::Info
+                level: FilterLevel::Info,
             },
             LogDirective {
                 name: Some("crate1::mod1".to_string()),
-                level: FilterLevel::Warning
-            }
+                level: FilterLevel::Warning,
+            },
         ]);
         assert!(logger.enabled(Level::Warning, "crate1::mod1"));
         assert!(!logger.enabled(Level::Info, "crate1::mod1"));
@@ -374,8 +390,14 @@ mod tests {
     #[test]
     fn no_match() {
         let logger = make_logger(vec![
-            LogDirective { name: Some("crate2".to_string()), level: FilterLevel::Info },
-            LogDirective { name: Some("crate1::mod1".to_string()), level: FilterLevel::Warning }
+            LogDirective {
+                name: Some("crate2".to_string()),
+                level: FilterLevel::Info,
+            },
+            LogDirective {
+                name: Some("crate1::mod1".to_string()),
+                level: FilterLevel::Warning,
+            },
         ]);
         assert!(!logger.enabled(Level::Warning, "crate3"));
     }
@@ -383,8 +405,14 @@ mod tests {
     #[test]
     fn match_beginning() {
         let logger = make_logger(vec![
-            LogDirective { name: Some("crate2".to_string()), level: FilterLevel::Info },
-            LogDirective { name: Some("crate1::mod1".to_string()), level: FilterLevel::Warning }
+            LogDirective {
+                name: Some("crate2".to_string()),
+                level: FilterLevel::Info,
+            },
+            LogDirective {
+                name: Some("crate1::mod1".to_string()),
+                level: FilterLevel::Warning,
+            },
         ]);
         assert!(logger.enabled(Level::Info, "crate2::mod1"));
     }
@@ -392,9 +420,18 @@ mod tests {
     #[test]
     fn match_beginning_longest_match() {
         let logger = make_logger(vec![
-            LogDirective { name: Some("crate2".to_string()), level: FilterLevel::Info },
-            LogDirective { name: Some("crate2::mod".to_string()), level: FilterLevel::Debug },
-            LogDirective { name: Some("crate1::mod1".to_string()), level: FilterLevel::Warning }
+            LogDirective {
+                name: Some("crate2".to_string()),
+                level: FilterLevel::Info,
+            },
+            LogDirective {
+                name: Some("crate2::mod".to_string()),
+                level: FilterLevel::Debug,
+            },
+            LogDirective {
+                name: Some("crate1::mod1".to_string()),
+                level: FilterLevel::Warning,
+            },
         ]);
         assert!(logger.enabled(Level::Debug, "crate2::mod1"));
         assert!(!logger.enabled(Level::Debug, "crate2"));
@@ -403,8 +440,14 @@ mod tests {
     #[test]
     fn match_default() {
         let logger = make_logger(vec![
-            LogDirective { name: None, level: FilterLevel::Info },
-            LogDirective { name: Some("crate1::mod1".to_string()), level: FilterLevel::Warning }
+            LogDirective {
+                name: None,
+                level: FilterLevel::Info,
+            },
+            LogDirective {
+                name: Some("crate1::mod1".to_string()),
+                level: FilterLevel::Warning,
+            },
         ]);
         assert!(logger.enabled(Level::Warning, "crate1::mod1"));
         assert!(logger.enabled(Level::Info, "crate2::mod2"));
@@ -413,8 +456,14 @@ mod tests {
     #[test]
     fn zero_level() {
         let logger = make_logger(vec![
-            LogDirective { name: None, level: FilterLevel::Info },
-            LogDirective { name: Some("crate1::mod1".to_string()), level: FilterLevel::Off }
+            LogDirective {
+                name: None,
+                level: FilterLevel::Info,
+            },
+            LogDirective {
+                name: Some("crate1::mod1".to_string()),
+                level: FilterLevel::Off,
+            },
         ]);
         assert!(!logger.enabled(Level::Error, "crate1::mod1"));
         assert!(logger.enabled(Level::Info, "crate2::mod2"));
