@@ -1,8 +1,3 @@
-extern crate log;
-extern crate slog_scope;
-extern crate slog_stdlog;
-extern crate slog_term;
-
 use crate::new;
 use slog::*;
 use std::sync;

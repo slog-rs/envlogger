@@ -1,8 +1,5 @@
-extern crate regex;
-
+use regex::Regex;
 use std::fmt;
-
-use self::regex::Regex;
 
 pub struct Filter {
     inner: Regex,
@@ -22,7 +19,7 @@ impl Filter {
 }
 
 impl fmt::Display for Filter {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.inner.fmt(f)
     }
 }

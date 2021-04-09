@@ -1,27 +1,7 @@
-extern crate slog_async;
-extern crate slog_envlogger;
-extern crate slog_scope;
-extern crate slog_stdlog;
-extern crate slog_term;
-
-/// Import longer-name versions of macros only to not collide with legacy `log`
-#[macro_use(
-    slog_error,
-    slog_info,
-    slog_trace,
-    slog_log,
-    slog_o,
-    slog_record,
-    slog_record_static,
-    slog_b,
-    slog_kv
-)]
-extern crate slog;
-
+use log::*;
 use slog::Drain;
-
-#[macro_use]
-extern crate log;
+/// Import longer-name versions of macros only to not collide with legacy `log`
+use slog::{slog_error, slog_info, slog_o, slog_trace};
 
 fn main() {
     let drain = slog_async::Async::default(slog_envlogger::new(

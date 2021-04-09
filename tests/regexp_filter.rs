@@ -1,7 +1,4 @@
-#[macro_use]
-extern crate log;
-extern crate slog_envlogger;
-
+use log::*;
 use std::env;
 use std::process;
 use std::str;

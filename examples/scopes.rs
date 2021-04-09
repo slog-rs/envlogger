@@ -1,12 +1,5 @@
-extern crate slog_envlogger;
-extern crate slog_scope;
-extern crate slog_stdlog;
-
-#[macro_use(o, kv)]
-extern crate slog;
-
-#[macro_use]
-extern crate log;
+use log::*;
+use slog::o;
 
 fn main() {
     let _guard = slog_envlogger::init().unwrap();

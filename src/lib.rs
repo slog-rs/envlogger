@@ -73,8 +73,6 @@
 )]
 #![cfg_attr(test, deny(warnings))]
 
-extern crate slog;
-
 use slog::*;
 use std::cell::RefCell;
 use std::{env, result};
@@ -116,9 +114,9 @@ pub struct LogBuilder<T: Drain> {
 
 impl<T: Drain> LogBuilder<T> {
     /// Initializes the log builder with defaults
-    pub fn new(d: T) -> Self {
+    pub fn new(drain: T) -> Self {
         LogBuilder {
-            drain: d,
+            drain,
             directives: Vec::new(),
             filter: None,
         }
@@ -131,7 +129,7 @@ impl<T: Drain> LogBuilder<T> {
     pub fn filter(mut self, module: Option<&str>, level: FilterLevel) -> Self {
         self.directives.push(LogDirective {
             name: module.map(|s| s.to_string()),
-            level: level,
+            level,
         });
         self
     }
@@ -176,16 +174,16 @@ impl<T: Drain> LogBuilder<T> {
         } = self;
 
         EnvLogger {
-            drain: drain,
-            directives: directives,
-            filter: filter,
+            drain,
+            directives,
+            filter,
         }
     }
 }
 
 impl<T: Drain> EnvLogger<T> {
-    pub fn new(d: T) -> Self {
-        let mut builder = LogBuilder::new(d);
+    pub fn new(drain: T) -> Self {
+        let mut builder = LogBuilder::new(drain);
 
         if let Ok(s) = env::var("RUST_LOG") {
             builder = builder.parse(&s);
@@ -220,7 +218,7 @@ where
 {
     type Err = T::Err;
     type Ok = ();
-    fn log(&self, info: &Record, val: &OwnedKVList) -> result::Result<(), T::Err> {
+    fn log(&self, info: &Record<'_>, val: &OwnedKVList) -> result::Result<(), T::Err> {
         if !self.enabled(info.level(), info.module()) {
             return Ok(());
         }
@@ -246,8 +244,8 @@ struct LogDirective {
 }
 
 /// Create a `EnvLogger` using `RUST_LOG` environment variable
-pub fn new<T: Drain>(d: T) -> EnvLogger<T> {
-    let mut builder = LogBuilder::new(d);
+pub fn new<T: Drain>(drain: T) -> EnvLogger<T> {
+    let mut builder = LogBuilder::new(drain);
 
     if let Ok(s) = env::var("RUST_LOG") {
         builder = builder.parse(&s);
@@ -267,14 +265,14 @@ fn parse_logging_spec(spec: &str) -> (Vec<LogDirective>, Option<filter::Filter>)
     if parts.next().is_some() {
         println!(
             "warning: invalid logging spec '{}', \
-                 ignoring it (too many '/'s)",
+             ignoring it (too many '/'s)",
             spec
         );
         return (dirs, None);
     }
-    mods.map(|m| {
+    if let Some(m) = mods {
         for s in m.split(',') {
-            if s.len() == 0 {
+            if s.is_empty() {
                 continue;
             }
             let mut parts = s.split('=');
@@ -314,9 +312,9 @@ fn parse_logging_spec(spec: &str) -> (Vec<LogDirective>, Option<filter::Filter>)
                 level: log_level,
             });
         }
-    });
+    }
 
-    let filter = filter.map_or(None, |filter| match filter::Filter::new(filter) {
+    let filter = filter.and_then(|filter| match filter::Filter::new(filter) {
         Ok(re) => Some(re),
         Err(e) => {
             println!("warning: invalid regex filter - {}", e);
@@ -324,12 +322,11 @@ fn parse_logging_spec(spec: &str) -> (Vec<LogDirective>, Option<filter::Filter>)
         }
     });
 
-    return (dirs, filter);
+    (dirs, filter)
 }
 
 #[cfg(test)]
 mod tests {
-    use super::slog;
     use slog::{FilterLevel, Level};
 
     use super::{parse_logging_spec, EnvLogger, LogBuilder, LogDirective};
